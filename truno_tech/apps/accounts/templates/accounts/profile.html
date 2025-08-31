@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Profile - Truno Tech{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Profile</h1>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-person-circle me-2"></i>Informasi Profile</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless">
+                    <tr>
+                        <th width="30%">Username</th>
+                        <td>: {{ user.username }}</td>
+                    </tr>
+                    <tr>
+                        <th>Nama</th>
+                        <td>: {{ user.get_full_name|default:"Belum diisi" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Email</th>
+                        <td>: {{ user.email|default:"Belum diisi" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Role</th>
+                        <td>: <span class="badge bg-primary">{{ profile.get_role_display }}</span></td>
+                    </tr>
+                    <tr>
+                        <th>No. Telepon</th>
+                        <td>: {{ profile.phone|default:"Belum diisi" }}</td>
+                    </tr>
+                    {% if profile.role == 'client' %}
+                    <tr>
+                        <th>Maksimal Tenant</th>
+                        <td>: {{ profile.max_tenants }}</td>
+                    </tr>
+                    {% endif %}
+                    <tr>
+                        <th>Alamat</th>
+                        <td>: {{ profile.address|default:"Belum diisi" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Dibuat Oleh</th>
+                        <td>: {{ profile.created_by.username|default:"System" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Tanggal Dibuat</th>
+                        <td>: {{ profile.created_at|date:"d M Y H:i" }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

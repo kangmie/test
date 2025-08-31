@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}Atur Stok {{ product.name }} - Truno Tech{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Atur Stok Produk</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'products:list' %}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Kembali
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="bi bi-box me-2"></i>Informasi Produk</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless">
+                    <tr>
+                        <th width="30%">SKU</th>
+                        <td>: <code>{{ product.sku }}</code></td>
+                    </tr>
+                    <tr>
+                        <th>Nama</th>
+                        <td>: {{ product.name }}</td>
+                    </tr>
+                    <tr>
+                        <th>Kategori</th>
+                        <td>: {{ product.category.name }}</td>
+                    </tr>
+                    <tr>
+                        <th>Tenant</th>
+                        <td>: {{ product.tenant.name }}</td>
+                    </tr>
+                    <tr>
+                        <th>Stok Saat Ini</th>
+                        <td>: 
+                            <span class="badge {% if product.qty > 10 %}bg-success{% elif product.qty > 5 %}bg-warning{% else %}bg-danger{% endif %} fs-6">
+                                {{ product.qty }}
+                            </span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-gear me-2"></i>Penyesuaian Stok</h5>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">{{ form.adjustment_type.label }}</label>
+                        {{ form.adjustment_type }}
+                        {% if form.adjustment_type.errors %}
+                            <div class="text-danger small">{{ form.adjustment_type.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">{{ form.quantity.label }}</label>
+                        {{ form.quantity }}
+                        {% if form.quantity.errors %}
+                            <div class="text-danger small">{{ form.quantity.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">{{ form.notes.label }}</label>
+                        {{ form.notes }}
+                        {% if form.notes.errors %}
+                            <div class="text-danger small">{{ form.notes.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{% url 'products:list' %}" class="btn btn-secondary me-md-2">
+                            <i class="bi bi-x-circle me-1"></i>Batal
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-save me-1"></i>Terapkan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

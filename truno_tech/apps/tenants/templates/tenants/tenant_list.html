@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Daftar Tenant - Truno Tech{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Daftar Tenant</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'tenants:create' %}" class="btn btn-sm btn-primary">
+            <i class="bi bi-plus-circle me-1"></i>Tambah Tenant
+        </a>
+    </div>
+</div>
+
+{% if tenants %}
+    <div class="row">
+        {% for tenant in tenants %}
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ tenant.name }}</h5>
+                    <p class="card-text">
+                        <small class="text-muted">
+                            <i class="bi bi-geo-alt me-1"></i>{{ tenant.address|truncatewords:10 }}
+                        </small><br>
+                        <small class="text-muted">
+                            <i class="bi bi-telephone me-1"></i>{{ tenant.phone }}
+                        </small>
+                    </p>
+                    <div class="btn-group btn-group-sm" role="group">
+                        <a href="{% url 'tenants:detail' tenant.id %}" class="btn btn-outline-info">
+                            <i class="bi bi-eye"></i> Detail
+                        </a>
+                        <a href="{% url 'tenants:edit' tenant.id %}" class="btn btn-outline-warning">
+                            <i class="bi bi-pencil"></i> Edit
+                        </a>
+                        <a href="{% url 'tenants:delete' tenant.id %}" 
+                           class="btn btn-outline-danger"
+                           onclick="return confirm('Yakin ingin menghapus tenant ini?')">
+                            <i class="bi bi-trash"></i> Hapus
+                        </a>
+                    </div>
+                </div>
+                <div class="card-footer text-muted">
+                    <small>Dibuat: {{ tenant.created_at|date:"d M Y" }}</small>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="text-center py-5">
+        <i class="bi bi-building text-muted" style="font-size: 3rem;"></i>
+        <h4 class="text-muted mt-3">Belum ada tenant</h4>
+        <p class="text-muted">Mulai dengan membuat tenant pertama Anda.</p>
+        <a href="{% url 'tenants:create' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i>Tambah Tenant
+        </a>
+    </div>
+{% endif %}
+{% endblock %}

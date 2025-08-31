@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Daftar Bahan - Truno Tech{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Daftar Bahan</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'hpp:bahan_create' %}" class="btn btn-sm btn-primary">
+            <i class="bi bi-plus-circle me-1"></i>Tambah Bahan
+        </a>
+    </div>
+</div>
+
+{% if bahan_list %}
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Nama Bahan</th>
+                    <th>Harga Satuan</th>
+                    <th>Satuan</th>
+                    <th>Keterangan</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for bahan in bahan_list %}
+                <tr>
+                    <td><strong>{{ bahan.nama_bahan }}</strong></td>
+                    <td>{{ bahan.harga_satuan_display }}</td>
+                    <td>{{ bahan.satuan }}</td>
+                    <td>{{ bahan.keterangan|truncatewords:8|default:"Tidak ada keterangan" }}</td>
+                    <td>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <a href="{% url 'hpp:bahan_edit' bahan.id %}" class="btn btn-outline-warning">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'hpp:bahan_delete' bahan.id %}" 
+                               class="btn btn-outline-danger"
+                               onclick="return confirm('Yakin ingin menghapus bahan ini?')">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="text-center py-5">
+        <i class="bi bi-box2 text-muted" style="font-size: 3rem;"></i>
+        <h4 class="text-muted mt-3">Belum ada bahan</h4>
+        <p class="text-muted">Mulai dengan membuat data bahan untuk perhitungan HPP.</p>
+        <a href="{% url 'hpp:bahan_create' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i>Tambah Bahan
+        </a>
+    </div>
+{% endif %}
+{% endblock %}

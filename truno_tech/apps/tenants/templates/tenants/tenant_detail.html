@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block title %}Detail {{ tenant.name }} - Truno Tech{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Detail Tenant: {{ tenant.name }}</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'tenants:list' %}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Kembali
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-building me-2"></i>Informasi Tenant</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless">
+                    <tr>
+                        <th width="30%">Nama</th>
+                        <td>: {{ tenant.name }}</td>
+                    </tr>
+                    <tr>
+                        <th>Alamat</th>
+                        <td>: {{ tenant.address }}</td>
+                    </tr>
+                    <tr>
+                        <th>No. Telepon</th>
+                        <td>: {{ tenant.phone }}</td>
+                    </tr>
+                    <tr>
+                        <th>Status</th>
+                        <td>: 
+                            {% if tenant.is_active %}
+                                <span class="badge bg-success">Aktif</span>
+                            {% else %}
+                                <span class="badge bg-danger">Tidak Aktif</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Dibuat</th>
+                        <td>: {{ tenant.created_at|date:"d M Y H:i" }}</td>
+                    </tr>
+                </table>
+                
+                <div class="mt-3">
+                    <a href="{% url 'tenants:edit' tenant.id %}" class="btn btn-warning btn-sm">
+                        <i class="bi bi-pencil me-1"></i>Edit
+                    </a>
+                    <a href="{% url 'tenants:delete' tenant.id %}" 
+                       class="btn btn-danger btn-sm ms-2"
+                       onclick="return confirm('Yakin ingin menghapus tenant ini?')">
+                        <i class="bi bi-trash me-1"></i>Hapus
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-people me-2"></i>Akses Crew</h5>
+            </div>
+            <div class="card-body">
+                <!-- Form tambah crew -->
+                <form method="post" class="mb-3">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-8">
+                            {{ access_form.crew }}
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-primary btn-sm">
+                                <i class="bi bi-plus"></i> Tambah
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                
+                <!-- Daftar crew yang memiliki akses -->
+                {% if accesses %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Crew</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for access in accesses %}
+                                <tr>
+                                    <td>
+                                        {{ access.crew.get_full_name|default:access.crew.username }}
+                                        <br><small class="text-muted">{{ access.crew.email }}</small>
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'tenants:remove_access' tenant.id access.id %}" 
+                                           class="btn btn-sm btn-outline-danger"
+                                           onclick="return confirm('Hapus akses crew ini?')">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">Belum ada crew yang memiliki akses ke tenant ini.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

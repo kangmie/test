@@ -1,0 +1,198 @@
+{% extends 'base.html' %}
+
+{% block title %}Analisis {{ tenant.name }} - Truno Tech{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Analisis - {{ tenant.name }}</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'dashboard:home' %}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Dashboard Utama
+        </a>
+    </div>
+</div>
+
+<!-- Tenant Selector -->
+{% if tenants.count > 1 %}
+<div class="row mb-3">
+    <div class="col-md-4">
+        <form method="get">
+            <div class="input-group">
+                <select name="tenant" class="form-control" onchange="this.form.submit()">
+                    {% for t in tenants %}
+                        <option value="{{ t.id }}" {% if t.id == tenant.id %}selected{% endif %}>
+                            {{ t.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <button class="btn btn-outline-secondary" type="submit">Pilih</button>
+            </div>
+        </form>
+    </div>
+    <div class="col-md-8">
+        <p class="text-muted">Periode: {{ date_range }}</p>
+    </div>
+</div>
+{% endif %}
+
+<!-- Revenue Chart Section -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-graph-up me-2"></i>Pendapatan Harian</h5>
+            </div>
+            <div class="card-body">
+                {% if daily_revenue %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Tanggal</th>
+                                    <th>Jumlah Order</th>
+                                    <th>Revenue</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in daily_revenue %}
+                                <tr>
+                                    <td>{{ item.day|date:"d M Y" }}</td>
+                                    <td>{{ item.order_count }}</td>
+                                    <td>Rp {{ item.revenue|floatformat:0 }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">Belum ada data revenue untuk periode ini.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Top Products -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-trophy me-2"></i>Produk Terlaris</h5>
+            </div>
+            <div class="card-body">
+                {% if top_products %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Produk</th>
+                                    <th>Qty</th>
+                                    <th>Revenue</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for product in top_products %}
+                                <tr>
+                                    <td>{{ product.product__name }}</td>
+                                    <td>{{ product.total_qty }}</td>
+                                    <td>Rp {{ product.total_revenue|floatformat:0 }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">Belum ada data produk terlaris.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Customer Analysis -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-people me-2"></i>Pelanggan Teratas</h5>
+            </div>
+            <div class="card-body">
+                {% if customer_analysis %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Nama</th>
+                                    <th>Order</th>
+                                    <th>Total Belanja</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for customer in customer_analysis %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ customer.customer_name }}</strong>
+                                        {% if customer.customer_phone %}
+                                            <br><small class="text-muted">{{ customer.customer_phone }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ customer.order_count }}x</td>
+                                    <td>Rp {{ customer.total_spent|floatformat:0 }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">Belum ada data pelanggan.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Margin Analysis -->
+{% if margin_data %}
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-calculator me-2"></i>Analisis Margin (Revenue vs HPP)</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Periode</th>
+                                <th>Revenue</th>
+                                <th>HPP</th>
+                                <th>Margin</th>
+                                <th>Margin %</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for data in margin_data %}
+                            <tr>
+                                <td><strong>{{ data.periode }}</strong></td>
+                                <td>Rp {{ data.revenue|floatformat:0 }}</td>
+                                <td>Rp {{ data.hpp|floatformat:0 }}</td>
+                                <td>
+                                    <span class="{% if data.margin >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                        Rp {{ data.margin|floatformat:0 }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="{% if data.margin_percentage >= 0 %}text-success{% else %}text-danger{% endif %}">
+                                        {{ data.margin_percentage|floatformat:1 }}%
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

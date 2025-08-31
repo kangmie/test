@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}Super Admin Dashboard - Truno Tech{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Super Admin Dashboard</h1>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card text-white bg-primary">
+            <div class="card-body text-center">
+                <i class="bi bi-people" style="font-size: 3rem;"></i>
+                <h2 class="mt-3">{{ total_clients }}</h2>
+                <p class="card-text">Total Client</p>
+                <a href="{% url 'accounts:create_client' %}" class="btn btn-light">
+                    <i class="bi bi-plus-circle me-1"></i>Kelola Client
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-info-circle me-2"></i>Informasi</h5>
+            </div>
+            <div class="card-body">
+                <p>Selamat datang di Truno Tech SAAS Dashboard.</p>
+                <p>Sebagai Super Admin, Anda dapat:</p>
+                <ul>
+                    <li>Membuat akun Client/Owner baru</li>
+                    <li>Menetapkan batas maksimal tenant per client</li>
+                    <li>Mengelola user yang telah dibuat</li>
+                </ul>
+                <hr>
+                <p class="text-muted">
+                    <small>
+                        <i class="bi bi-shield-check me-1"></i>
+                        Super Admin tidak memiliki akses ke analisis bisnis client.
+                    </small>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

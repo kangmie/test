@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block title %}Detail HPP {{ hpp.periode }} - Truno Tech{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Detail HPP {{ hpp.periode }}</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'hpp:list' %}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Kembali
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5><i class="bi bi-info-circle me-2"></i>Informasi HPP</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-borderless">
+                    <tr>
+                        <th width="30%">Periode</th>
+                        <td>: <strong>{{ hpp.periode }}</strong></td>
+                    </tr>
+                    <tr>
+                        <th>Tenant</th>
+                        <td>: {{ hpp.tenant.name }}</td>
+                    </tr>
+                    <tr>
+                        <th>Total HPP</th>
+                        <td>: <strong class="text-success">{{ hpp.amount_total_display }}</strong></td>
+                    </tr>
+                    <tr>
+                        <th>Dibuat Oleh</th>
+                        <td>: {{ hpp.created_by.get_full_name|default:hpp.created_by.username }}</td>
+                    </tr>
+                    <tr>
+                        <th>Tanggal Dibuat</th>
+                        <td>: {{ hpp.created_at|date:"d M Y H:i" }}</td>
+                    </tr>
+                    <tr>
+                        <th>Catatan</th>
+                        <td>: {{ hpp.catatan|default:"Tidak ada catatan" }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-list-ul me-2"></i>Detail Bahan</h5>
+            </div>
+            <div class="card-body">
+                {% if hpp_details %}
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Bahan</th>
+                                    <th>Qty</th>
+                                    <th>Harga</th>
+                                    <th>Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for detail in hpp_details %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ detail.bahan.nama_bahan }}</strong>
+                                        <br><small class="text-muted">Per {{ detail.bahan.satuan }}</small>
+                                    </td>
+                                    <td>{{ detail.qty }} {{ detail.bahan.satuan }}</td>
+                                    <td>{{ detail.harga_satuan_display }}</td>
+                                    <td><strong>{{ detail.subtotal_display }}</strong></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-success">
+                                    <th colspan="3">Total HPP</th>
+                                    <th>{{ hpp.amount_total_display }}</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-muted">Tidak ada detail bahan dalam HPP ini.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

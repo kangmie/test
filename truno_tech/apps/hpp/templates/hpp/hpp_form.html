@@ -1,0 +1,235 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Truno Tech{% endblock %}
+
+{% block extra_js %}
+<script>
+let bahanData = [];
+let itemCounter = 1;
+
+function loadBahanData() {
+    fetch('/hpp/api/bahan/')
+        .then(response => response.json())
+        .then(data => {
+            bahanData = data.bahan;
+            updateAllBahanSelects();
+        });
+}
+
+function updateAllBahanSelects() {
+    const selects = document.querySelectorAll('.bahan-select');
+    selects.forEach(select => {
+        const currentValue = select.value;
+        select.innerHTML = '<option value="">Pilih Bahan</option>';
+        
+        bahanData.forEach(bahan => {
+            const option = document.createElement('option');
+            option.value = bahan.id;
+            option.textContent = `${bahan.nama_bahan} - ${formatRupiah(bahan.harga_satuan)}/${bahan.satuan}`;
+            option.dataset.price = bahan.harga_satuan;
+            option.dataset.satuan = bahan.satuan;
+            if (bahan.id == currentValue) option.selected = true;
+            select.appendChild(option);
+        });
+    });
+}
+
+function formatRupiah(amount) {
+    return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount);
+}
+
+function addItem() {
+    const container = document.getElementById('items-container');
+    const newItem = document.createElement('div');
+    newItem.className = 'row mb-3 hpp-item';
+    newItem.innerHTML = `
+        <div class="col-md-5">
+            <select name="bahan_id[]" class="form-control bahan-select" onchange="updateSubtotal(this)" required>
+                <option value="">Pilih Bahan</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <input type="number" name="qty[]" class="form-control qty-input" step="0.01" min="0.01" onchange="updateSubtotal(this)" placeholder="Jumlah" required>
+        </div>
+        <div class="col-md-3">
+            <input type="text" class="form-control subtotal-display" readonly placeholder="Subtotal">
+        </div>
+        <div class="col-md-1">
+            <button type="button" class="btn btn-danger btn-sm" onclick="removeItem(this)">
+                <i class="bi bi-trash"></i>
+            </button>
+        </div>
+    `;
+    container.appendChild(newItem);
+    
+    // Update bahan options for new select
+    const newSelect = newItem.querySelector('.bahan-select');
+    bahanData.forEach(bahan => {
+        const option = document.createElement('option');
+        option.value = bahan.id;
+        option.textContent = `${bahan.nama_bahan} - ${formatRupiah(bahan.harga_satuan)}/${bahan.satuan}`;
+        option.dataset.price = bahan.harga_satuan;
+        option.dataset.satuan = bahan.satuan;
+        newSelect.appendChild(option);
+    });
+}
+
+function removeItem(button) {
+    button.closest('.hpp-item').remove();
+    updateTotal();
+}
+
+function updateSubtotal(element) {
+    const row = element.closest('.hpp-item');
+    const bahanSelect = row.querySelector('.bahan-select');
+    const qtyInput = row.querySelector('.qty-input');
+    const subtotalDisplay = row.querySelector('.subtotal-display');
+    
+    const selectedOption = bahanSelect.selectedOptions[0];
+    const qty = parseFloat(qtyInput.value) || 0;
+    
+    if (selectedOption && selectedOption.dataset.price && qty > 0) {
+        const price = parseInt(selectedOption.dataset.price);
+        const subtotal = price * qty;
+        subtotalDisplay.value = formatRupiah(subtotal);
+    } else {
+        subtotalDisplay.value = '';
+    }
+    
+    updateTotal();
+}
+
+function updateTotal() {
+    let total = 0;
+    const subtotalDisplays = document.querySelectorAll('.subtotal-display');
+    
+    subtotalDisplays.forEach(display => {
+        if (display.value) {
+            const value = display.value.replace(/[^\d]/g, '');
+            total += parseInt(value) || 0;
+        }
+    });
+    
+    document.getElementById('total-display').textContent = formatRupiah(total);
+}
+
+// Load bahan data when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    loadBahanData();
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">{{ title }}</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'hpp:list' %}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Kembali
+        </a>
+    </div>
+</div>
+
+<form method="post">
+    {% csrf_token %}
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="bi bi-info-circle me-2"></i>Informasi HPP</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Tenant</label>
+                            <select name="tenant" class="form-control" required>
+                                <option value="">Pilih Tenant</option>
+                                {% for tenant in tenants %}
+                                    <option value="{{ tenant.id }}">{{ tenant.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ form.periode.label }}</label>
+                            {{ form.periode }}
+                            {% if form.periode.errors %}
+                                <div class="text-danger small">{{ form.periode.errors.0 }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">{{ form.catatan.label }}</label>
+                        {{ form.catatan }}
+                        {% if form.catatan.errors %}
+                            <div class="text-danger small">{{ form.catatan.errors.0 }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5><i class="bi bi-list-ul me-2"></i>Detail Bahan</h5>
+                    <button type="button" class="btn btn-sm btn-primary" onclick="addItem()">
+                        <i class="bi bi-plus"></i> Tambah Bahan
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-2">
+                        <div class="col-md-5"><strong>Bahan</strong></div>
+                        <div class="col-md-3"><strong>Jumlah</strong></div>
+                        <div class="col-md-3"><strong>Subtotal</strong></div>
+                        <div class="col-md-1"><strong>Aksi</strong></div>
+                    </div>
+                    
+                    <div id="items-container">
+                        <div class="row mb-3 hpp-item">
+                            <div class="col-md-5">
+                                <select name="bahan_id[]" class="form-control bahan-select" onchange="updateSubtotal(this)" required>
+                                    <option value="">Pilih Bahan</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <input type="number" name="qty[]" class="form-control qty-input" step="0.01" min="0.01" onchange="updateSubtotal(this)" placeholder="Jumlah" required>
+                            </div>
+                            <div class="col-md-3">
+                                <input type="text" class="form-control subtotal-display" readonly placeholder="Subtotal">
+                            </div>
+                            <div class="col-md-1">
+                                <button type="button" class="btn btn-danger btn-sm" onclick="removeItem(this)" disabled>
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-calculator me-2"></i>Total HPP</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <strong>Total:</strong>
+                        <strong id="total-display">Rp 0</strong>
+                    </div>
+                    <hr>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-save me-1"></i>Simpan HPP
+                        </button>
+                        <a href="{% url 'hpp:list' %}" class="btn btn-secondary">
+                            <i class="bi bi-x-circle me-1"></i>Batal
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}

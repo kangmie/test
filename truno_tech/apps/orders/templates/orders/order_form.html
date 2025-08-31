@@ -1,0 +1,245 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Truno Tech{% endblock %}
+
+{% block extra_js %}
+<script>
+let products = [];
+let itemCounter = 1;
+
+function updateProducts() {
+    const tenantSelect = document.getElementById('tenant-select');
+    const tenantId = tenantSelect.value;
+    
+    if (tenantId) {
+        fetch(`/orders/api/products/?tenant_id=${tenantId}`)
+            .then(response => response.json())
+            .then(data => {
+                products = data.products;
+                updateAllProductSelects();
+            });
+    } else {
+        products = [];
+        updateAllProductSelects();
+    }
+}
+
+function updateAllProductSelects() {
+    const selects = document.querySelectorAll('.product-select');
+    selects.forEach(select => {
+        const currentValue = select.value;
+        select.innerHTML = '<option value="">Pilih Produk</option>';
+        
+        products.forEach(product => {
+            const option = document.createElement('option');
+            option.value = product.id;
+            option.textContent = `${product.name} (${product.sku}) - ${formatRupiah(product.price)} - Stok: ${product.qty}`;
+            option.dataset.price = product.price;
+            option.dataset.stock = product.qty;
+            if (product.id == currentValue) option.selected = true;
+            select.appendChild(option);
+        });
+    });
+}
+
+function formatRupiah(amount) {
+    return 'Rp ' + new Intl.NumberFormat('id-ID').format(amount);
+}
+
+function addItem() {
+    const container = document.getElementById('items-container');
+    const newItem = document.createElement('div');
+    newItem.className = 'row mb-3 order-item';
+    newItem.innerHTML = `
+        <div class="col-md-6">
+            <select name="product_id[]" class="form-control product-select" onchange="updateSubtotal(this)" required>
+                <option value="">Pilih Produk</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <input type="number" name="qty[]" class="form-control qty-input" min="1" onchange="updateSubtotal(this)" placeholder="Jumlah" required>
+        </div>
+        <div class="col-md-2">
+            <input type="text" class="form-control subtotal-display" readonly placeholder="Subtotal">
+        </div>
+        <div class="col-md-1">
+            <button type="button" class="btn btn-danger btn-sm" onclick="removeItem(this)">
+                <i class="bi bi-trash"></i>
+            </button>
+        </div>
+    `;
+    container.appendChild(newItem);
+    
+    // Update product options for new select
+    const newSelect = newItem.querySelector('.product-select');
+    products.forEach(product => {
+        const option = document.createElement('option');
+        option.value = product.id;
+        option.textContent = `${product.name} (${product.sku}) - ${formatRupiah(product.price)} - Stok: ${product.qty}`;
+        option.dataset.price = product.price;
+        option.dataset.stock = product.qty;
+        newSelect.appendChild(option);
+    });
+}
+
+function removeItem(button) {
+    button.closest('.order-item').remove();
+    updateTotal();
+}
+
+function updateSubtotal(element) {
+    const row = element.closest('.order-item');
+    const productSelect = row.querySelector('.product-select');
+    const qtyInput = row.querySelector('.qty-input');
+    const subtotalDisplay = row.querySelector('.subtotal-display');
+    
+    const selectedOption = productSelect.selectedOptions[0];
+    const qty = parseInt(qtyInput.value) || 0;
+    
+    if (selectedOption && selectedOption.dataset.price && qty > 0) {
+        const price = parseInt(selectedOption.dataset.price);
+        const stock = parseInt(selectedOption.dataset.stock);
+        
+        if (qty > stock) {
+            alert(`Stok tidak mencukupi. Stok tersedia: ${stock}`);
+            qtyInput.value = stock;
+            return;
+        }
+        
+        const subtotal = price * qty;
+        subtotalDisplay.value = formatRupiah(subtotal);
+    } else {
+        subtotalDisplay.value = '';
+    }
+    
+    updateTotal();
+}
+
+function updateTotal() {
+    let total = 0;
+    const subtotalDisplays = document.querySelectorAll('.subtotal-display');
+    
+    subtotalDisplays.forEach(display => {
+        if (display.value) {
+            const value = display.value.replace(/[^\d]/g, '');
+            total += parseInt(value) || 0;
+        }
+    });
+    
+    document.getElementById('total-display').textContent = formatRupiah(total);
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">{{ title }}</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'orders:list' %}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Kembali
+        </a>
+    </div>
+</div>
+
+<form method="post">
+    {% csrf_token %}
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="bi bi-building me-2"></i>Informasi Order</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Tenant</label>
+                        <select name="tenant" id="tenant-select" class="form-control" required onchange="updateProducts()">
+                            <option value="">Pilih Tenant</option>
+                            {% for tenant in tenants %}
+                                <option value="{{ tenant.id }}">{{ tenant.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ form.customer_name.label }}</label>
+                            {{ form.customer_name }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ form.customer_phone.label }}</label>
+                            {{ form.customer_phone }}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">{{ form.customer_address.label }}</label>
+                        {{ form.customer_address }}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5><i class="bi bi-cart me-2"></i>Item Order</h5>
+                    <button type="button" class="btn btn-sm btn-primary" onclick="addItem()">
+                        <i class="bi bi-plus"></i> Tambah Item
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-2">
+                        <div class="col-md-6"><strong>Produk</strong></div>
+                        <div class="col-md-3"><strong>Jumlah</strong></div>
+                        <div class="col-md-2"><strong>Subtotal</strong></div>
+                        <div class="col-md-1"><strong>Aksi</strong></div>
+                    </div>
+                    
+                    <div id="items-container">
+                        <div class="row mb-3 order-item">
+                            <div class="col-md-6">
+                                <select name="product_id[]" class="form-control product-select" onchange="updateSubtotal(this)" required>
+                                    <option value="">Pilih Produk</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <input type="number" name="qty[]" class="form-control qty-input" min="1" onchange="updateSubtotal(this)" placeholder="Jumlah" required>
+                            </div>
+                            <div class="col-md-2">
+                                <input type="text" class="form-control subtotal-display" readonly placeholder="Subtotal">
+                            </div>
+                            <div class="col-md-1">
+                                <button type="button" class="btn btn-danger btn-sm" onclick="removeItem(this)" disabled>
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-calculator me-2"></i>Ringkasan</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <strong>Total:</strong>
+                        <strong id="total-display">Rp 0</strong>
+                    </div>
+                    <hr>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-save me-1"></i>Simpan Order
+                        </button>
+                        <a href="{% url 'orders:list' %}" class="btn btn-secondary">
+                            <i class="bi bi-x-circle me-1"></i>Batal
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}

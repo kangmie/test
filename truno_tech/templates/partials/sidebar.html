@@ -1,0 +1,61 @@
+<div class="position-sticky pt-3">
+    <ul class="nav flex-column">
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'dashboard:home' %}">
+                <i class="bi bi-speedometer2 me-2"></i>Dashboard
+            </a>
+        </li>
+        
+        {% if user.userprofile.role == 'superuser' %}
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'accounts:create_client' %}">
+                    <i class="bi bi-person-plus me-2"></i>Kelola Client
+                </a>
+            </li>
+        {% endif %}
+        
+        {% if user.userprofile.role == 'client' %}
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'tenants:list' %}">
+                    <i class="bi bi-building me-2"></i>Tenant
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'accounts:create_crew' %}">
+                    <i class="bi bi-people me-2"></i>Kelola Crew
+                </a>
+            </li>
+        {% endif %}
+        
+        {% if user.userprofile.role in 'client,crew' %}
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'products:category_list' %}">
+                    <i class="bi bi-tags me-2"></i>Kategori
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'products:list' %}">
+                    <i class="bi bi-box me-2"></i>Produk
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'orders:list' %}">
+                    <i class="bi bi-cart me-2"></i>Order
+                </a>
+            </li>
+        {% endif %}
+        
+        {% if user.userprofile.role == 'client' %}
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'hpp:bahan_list' %}">
+                    <i class="bi bi-box2 me-2"></i>Bahan
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'hpp:list' %}">
+                    <i class="bi bi-calculator me-2"></i>HPP
+                </a>
+            </li>
+        {% endif %}
+    </ul>
+</div>

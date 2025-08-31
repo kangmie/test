@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Kategori Produk - Truno Tech{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Kategori Produk</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'products:category_create' %}" class="btn btn-sm btn-primary">
+            <i class="bi bi-plus-circle me-1"></i>Tambah Kategori
+        </a>
+    </div>
+</div>
+
+{% if categories %}
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Nama Kategori</th>
+                    <th>Tenant</th>
+                    <th>Deskripsi</th>
+                    <th>Jumlah Produk</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for category in categories %}
+                <tr>
+                    <td><strong>{{ category.name }}</strong></td>
+                    <td>{{ category.tenant.name }}</td>
+                    <td>{{ category.description|truncatewords:10|default:"Tidak ada deskripsi" }}</td>
+                    <td>{{ category.products.count }} produk</td>
+                    <td>
+                        <div class="btn-group btn-group-sm" role="group">
+                            <a href="{% url 'products:category_edit' category.id %}" class="btn btn-outline-warning">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'products:category_delete' category.id %}" 
+                               class="btn btn-outline-danger"
+                               onclick="return confirm('Yakin ingin menghapus kategori ini?')">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="text-center py-5">
+        <i class="bi bi-tags text-muted" style="font-size: 3rem;"></i>
+        <h4 class="text-muted mt-3">Belum ada kategori</h4>
+        <p class="text-muted">Mulai dengan membuat kategori produk pertama.</p>
+        <a href="{% url 'products:category_create' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i>Tambah Kategori
+        </a>
+    </div>
+{% endif %}
+{% endblock %}
