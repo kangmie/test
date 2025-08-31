@@ -2,186 +2,245 @@
 
 {% block title %}Dashboard - Truno Tech{% endblock %}
 
+{% block extra_css %}
+<style>
+  /* Section header */
+  .section-header {
+    border: 1px solid rgba(0,0,0,.06);
+    background: #fff;
+    border-radius: .9rem;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 6px 18px rgba(0,0,0,.04);
+  }
+
+  /* Stat cards */
+  .stat-card {
+    border: 0;
+    border-radius: 1rem;
+    background: #fff;
+    box-shadow: 0 12px 28px rgba(0,0,0,.06);
+    transition: transform .15s ease, box-shadow .15s ease;
+  }
+  .stat-card:hover { transform: translateY(-2px); box-shadow: 0 14px 36px rgba(0,0,0,.08); }
+
+  .stat-icon {
+    width: 48px; height: 48px; border-radius: 12px;
+    display: grid; place-items: center;
+    background: #fff7ed; /* amber-50 */
+    color: #b45309;      /* amber-700 */
+    border: 1px solid #fde68a33;
+  }
+
+  .stat-title { color:#6b7280; font-size:.9rem; margin-bottom:.15rem; }
+  .stat-value { font-weight: 800; font-size: 1.75rem; color:#111827; letter-spacing:.2px; }
+
+  /* Cards */
+  .card-elev {
+    border: 0; border-radius: 1rem; box-shadow: 0 8px 24px rgba(0,0,0,.06);
+  }
+  .card-elev .card-header {
+    background:#fff; border-bottom:1px solid rgba(0,0,0,.06); border-top-left-radius:1rem; border-top-right-radius:1rem;
+  }
+
+  /* Tables */
+  .table > :not(caption) > * > * { vertical-align: middle; }
+  .table thead th { font-weight:700; color:#374151; border-bottom-width:1px; }
+  .table tbody tr:hover { background:#fafafa; }
+
+  /* Badges */
+  .badge-soft-warning { background: #fef3c7; color: #92400e; }
+  .badge-soft-danger { background: #fee2e2; color: #991b1b; }
+
+  /* Buttons */
+  .btn-analytics {
+    border-color:#1f2937; color:#1f2937;
+  }
+  .btn-analytics:hover { background:#1f2937; color:#fff; }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-    <h1 class="h2">Dashboard</h1>
-    {% if user_role == 'client' %}
-    <div class="btn-toolbar mb-2 mb-md-0">
-        <a href="{% url 'dashboard:analytics' %}" class="btn btn-sm btn-outline-primary">
-            <i class="bi bi-graph-up me-1"></i>Analisis Detail
-        </a>
+
+<!-- Header -->
+<div class="section-header d-flex flex-wrap align-items-center justify-content-between mb-4">
+  <div class="d-flex align-items-center gap-3">
+    <div class="stat-icon" style="background:#f3f4f6; color:#1f2937; border:1px solid #e5e7eb;">
+      <i class="bi bi-speedometer2"></i>
     </div>
-    {% endif %}
+    <div>
+      <h1 class="h3 fw-bold mb-0">Dashboard</h1>
+      <div class="text-muted small">Ringkasan performa & aktivitas terbaru</div>
+    </div>
+  </div>
+
+  {% if user_role == 'client' %}
+  <div class="btn-toolbar">
+    <a href="{% url 'dashboard:analytics' %}" class="btn btn-sm btn-analytics">
+      <i class="bi bi-graph-up me-1"></i> Analisis Detail
+    </a>
+  </div>
+  {% endif %}
 </div>
 
-<!-- Statistics Cards -->
-<div class="row mb-4">
-    <div class="col-md-3">
-        <div class="card text-white bg-primary">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <h4>{{ stats.total_tenants }}</h4>
-                        <p class="card-text">Total Tenant</p>
-                    </div>
-                    <div class="align-self-center">
-                        <i class="bi bi-building" style="font-size: 2rem;"></i>
-                    </div>
-                </div>
-            </div>
+<!-- Stats -->
+<div class="row g-3 mb-4">
+  <div class="col-12 col-sm-6 col-xl-3">
+    <div class="card stat-card p-3">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <div class="stat-title">Total Tenant</div>
+          <div class="stat-value">{{ stats.total_tenants }}</div>
         </div>
+        <div class="stat-icon"><i class="bi bi-building"></i></div>
+      </div>
     </div>
-    
-    <div class="col-md-3">
-        <div class="card text-white bg-success">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <h4>{{ stats.total_products }}</h4>
-                        <p class="card-text">Total Produk</p>
-                    </div>
-                    <div class="align-self-center">
-                        <i class="bi bi-box" style="font-size: 2rem;"></i>
-                    </div>
-                </div>
-            </div>
+  </div>
+
+  <div class="col-12 col-sm-6 col-xl-3">
+    <div class="card stat-card p-3">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <div class="stat-title">Total Produk</div>
+          <div class="stat-value">{{ stats.total_products }}</div>
         </div>
+        <div class="stat-icon" style="background:#eff6ff;color:#1d4ed8;border-color:#93c5fd55"><i class="bi bi-box"></i></div>
+      </div>
     </div>
-    
-    <div class="col-md-3">
-        <div class="card text-white bg-info">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <h4>{{ stats.total_orders }}</h4>
-                        <p class="card-text">Total Order</p>
-                    </div>
-                    <div class="align-self-center">
-                        <i class="bi bi-cart" style="font-size: 2rem;"></i>
-                    </div>
-                </div>
-            </div>
+  </div>
+
+  <div class="col-12 col-sm-6 col-xl-3">
+    <div class="card stat-card p-3">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <div class="stat-title">Total Order</div>
+          <div class="stat-value">{{ stats.total_orders }}</div>
         </div>
+        <div class="stat-icon" style="background:#ecfeff;color:#0e7490;border-color:#67e8f955"><i class="bi bi-cart"></i></div>
+      </div>
     </div>
-    
-    <div class="col-md-3">
-        <div class="card text-white bg-warning">
-            <div class="card-body">
-                <div class="d-flex justify-content-between">
-                    <div>
-                        <h4>Rp {{ stats.total_revenue|floatformat:0 }}</h4>
-                        <p class="card-text">Total Revenue</p>
-                    </div>
-                    <div class="align-self-center">
-                        <i class="bi bi-currency-dollar" style="font-size: 2rem;"></i>
-                    </div>
-                </div>
-            </div>
+  </div>
+
+  <div class="col-12 col-sm-6 col-xl-3">
+    <div class="card stat-card p-3">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <div class="stat-title">Total Revenue</div>
+          <div class="stat-value">Rp {{ stats.total_revenue|floatformat:0 }}</div>
         </div>
+        <div class="stat-icon"><i class="bi bi-currency-dollar"></i></div>
+      </div>
     </div>
+  </div>
 </div>
 
-<div class="row">
-    <!-- Recent Orders -->
-    <div class="col-md-8">
-        <div class="card">
-            <div class="card-header">
-                <h5><i class="bi bi-clock-history me-2"></i>Order Terbaru</h5>
-            </div>
-            <div class="card-body">
-                {% if recent_orders %}
-                    <div class="table-responsive">
-                        <table class="table table-sm">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Tenant</th>
-                                    <th>Pelanggan</th>
-                                    <th>Total</th>
-                                    <th>Tanggal</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for order in recent_orders %}
-                                <tr>
-                                    <td>#{{ order.id }}</td>
-                                    <td>{{ order.tenant.name }}</td>
-                                    <td>{{ order.customer_name|default:"Walk-in" }}</td>
-                                    <td>{{ order.total_amount_display }}</td>
-                                    <td>{{ order.created_at|date:"d M H:i" }}</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                {% else %}
-                    <p class="text-muted">Belum ada order.</p>
-                {% endif %}
-            </div>
-        </div>
+<div class="row g-3">
+  <!-- Recent Orders -->
+  <div class="col-lg-8">
+    <div class="card card-elev">
+      <div class="card-header d-flex align-items-center justify-content-between">
+        <h5 class="mb-0"><i class="bi bi-clock-history me-2"></i>Order Terbaru</h5>
+        {% if recent_orders %}
+          <span class="badge rounded-pill bg-light text-muted">{{ recent_orders|length }} order</span>
+        {% endif %}
+      </div>
+      <div class="card-body">
+        {% if recent_orders %}
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead>
+                <tr>
+                  <th style="width:90px;">ID</th>
+                  <th>Tenant</th>
+                  <th>Pelanggan</th>
+                  <th class="text-end">Total</th>
+                  <th style="width:140px;">Tanggal</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for order in recent_orders %}
+                <tr>
+                  <td><span class="text-muted">#{{ order.id }}</span></td>
+                  <td class="fw-semibold">{{ order.tenant.name }}</td>
+                  <td>{{ order.customer_name|default:"Walk-in" }}</td>
+                  <td class="text-end">{{ order.total_amount_display }}</td>
+                  <td class="text-muted">{{ order.created_at|date:"d M H:i" }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="text-center py-4 text-muted">Belum ada order.</div>
+        {% endif %}
+      </div>
     </div>
-    
-    <!-- Low Stock Alert -->
-    <div class="col-md-4">
-        <div class="card">
-            <div class="card-header">
-                <h5><i class="bi bi-exclamation-triangle text-warning me-2"></i>Stok Menipis</h5>
+  </div>
+
+  <!-- Low Stock -->
+  <div class="col-lg-4">
+    <div class="card card-elev">
+      <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-exclamation-triangle text-warning me-2"></i>Stok Menipis</h5>
+      </div>
+      <div class="card-body">
+        {% if low_stock_products %}
+          {% for product in low_stock_products %}
+            <div class="d-flex justify-content-between align-items-center py-2">
+              <div>
+                <div class="fw-semibold">{{ product.name }}</div>
+                <small class="text-muted">{{ product.tenant.name }}</small>
+              </div>
+              {% if product.qty <= 2 %}
+                <span class="badge badge-soft-danger px-3">{{ product.qty }}</span>
+              {% else %}
+                <span class="badge badge-soft-warning px-3">{{ product.qty }}</span>
+              {% endif %}
             </div>
-            <div class="card-body">
-                {% if low_stock_products %}
-                    {% for product in low_stock_products %}
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <div>
-                                <strong>{{ product.name }}</strong>
-                                <br><small class="text-muted">{{ product.tenant.name }}</small>
-                            </div>
-                            <span class="badge {% if product.qty <= 2 %}bg-danger{% else %}bg-warning{% endif %}">
-                                {{ product.qty }}
-                            </span>
-                        </div>
-                        {% if not forloop.last %}<hr>{% endif %}
-                    {% endfor %}
-                {% else %}
-                    <p class="text-muted">Stok produk masih aman.</p>
-                {% endif %}
-            </div>
-        </div>
+            {% if not forloop.last %}<hr class="my-2">{% endif %}
+          {% endfor %}
+        {% else %}
+          <div class="text-center py-4 text-muted">Stok produk masih aman.</div>
+        {% endif %}
+      </div>
     </div>
+  </div>
 </div>
 
 {% if top_products and user_role == 'client' %}
-<div class="row mt-4">
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-header">
-                <h5><i class="bi bi-trophy me-2"></i>Produk Terlaris (30 Hari Terakhir)</h5>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-sm">
-                        <thead>
-                            <tr>
-                                <th>Produk</th>
-                                <th>Tenant</th>
-                                <th>Qty Terjual</th>
-                                <th>Revenue</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for product in top_products %}
-                            <tr>
-                                <td>{{ product.product__name }}</td>
-                                <td>{{ product.product__tenant__name }}</td>
-                                <td>{{ product.total_qty }}</td>
-                                <td>Rp {{ product.total_revenue|floatformat:0 }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+<div class="row g-3 mt-1">
+  <div class="col-12">
+    <div class="card card-elev">
+      <div class="card-header d-flex align-items-center justify-content-between">
+        <h5 class="mb-0"><i class="bi bi-trophy me-2"></i>Produk Terlaris (30 Hari Terakhir)</h5>
+        <span class="text-muted small">Periode: {{ period_start }} – {{ period_end }}</span>
+      </div>
+      <div class="card-body">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle">
+            <thead>
+              <tr>
+                <th>Produk</th>
+                <th>Tenant</th>
+                <th class="text-end">Qty Terjual</th>
+                <th class="text-end">Revenue</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for product in top_products %}
+              <tr>
+                <td class="fw-semibold">{{ product.product__name }}</td>
+                <td>{{ product.product__tenant__name }}</td>
+                <td class="text-end">{{ product.total_qty }}</td>
+                <td class="text-end">Rp {{ product.total_revenue|floatformat:0 }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
+      </div>
     </div>
+  </div>
 </div>
 {% endif %}
+
 {% endblock %}
